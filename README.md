@@ -1,4 +1,4 @@
-z# Per-project, declarative Julia package installations
+## Per-project, declarative Julia package installations
 
 **DeclarativePackages.jl**, or `jdp` for short, allows to declaratively specify which Julia packages a project should use, with exact version or commit details.
 
