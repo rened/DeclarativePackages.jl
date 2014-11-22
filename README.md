@@ -18,7 +18,7 @@ symlink(Pkg.dir("DeclarativePackages")*"/bin/jdp",  "~/local/bin/jdp")
 Simply create a `DECLARE` file in your project's directory and invoke `jdp` in that directory instead of `julia`. 
 
 Example for a `DECLARE` file:
-```jl
+```
 # Julia packages:  Packagename [ version or commit hash]
 JSON
 HDF5 0.4.6
