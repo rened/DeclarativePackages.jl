@@ -59,7 +59,7 @@ If you want to only control a few packages and update the rest automatically, yo
 HDF5 0.4.0
 Images
 ```
-Running `cp DECLARE.minimal DECLARE; jdp` will then update the rest of the required dependencies to the newest versions. And as you have `DECLARE` in your `git` repo you can always go back.
+Running `cp DECLARE.minimal DECLARE; jdp` will then update the rest of the required dependencies to the newest versions. And as you have `DECLARE` in your `git` repo, you can always go back.
 
 ## Uninstall
 
