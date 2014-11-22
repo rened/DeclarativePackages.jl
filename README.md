@@ -15,12 +15,10 @@ symlink(Pkg.dir("DeclarativePackages")*"/bin/jdp",  "~/local/bin/jdp")
 
 ## Usage
 
-Simply create a `DECLARE` file in your project's directory and run `jdp` in that directory instead of `julia`. 
-
-The syntax is very similar to Julia's `REQUIRE` files, and you can simply copy your `~/.julia/v0.x/REQUIRE` to `./DECLARE` to start off with your currently installed packages.
+Simply create a `DECLARE` file in your project's directory and invoke `jdp` in that directory instead of `julia`. 
 
 Example for a `DECLARE` file:
-```
+```jl
 # Julia packages:  Packagename [ version or commit hash]
 JSON
 HDF5 0.4.6
@@ -35,7 +33,7 @@ https://github.com/jakebolewski/LibGit2.jl.git dcbf6f2419f92edeae4014f0a293c66a3
 You can change both the name of the `DECLARE` file as well as the `julia` binary called via environment variables. All arguments after `jdp` will be passed on to Julia:
 
 ```bash
-DECLARE=mydeclarations.txt JULIA=/usr/bin/juliafromgit jdp -e "println(123")
+DECLARE=mydeclarations.txt JULIA=/usr/bin/juliafromgit jdp -e "println(123)"
 ```
 If you would like to start with `DECLARE` based on your currently installed packages, run:
 
@@ -46,23 +44,26 @@ Finally, `git add DECLARE` and track the set of installed packages along with yo
 
 ### How to update packages
 
-You will see that your `DECLARE` files get auto-updated if not all packages are specified. Also `METADATA` (where Julia gets the information about available packages from) is listed and fixed at a commit.
+You will see that your `DECLARE` files get auto-updated if not all packages details are fully specified. There is also an entry for `METADATA`, the repo where Julia gets the information about available packages from, fixed at a commit.
 
 There are several ways to update a package by editing `DECLARE`:
 
 * You can change the version number or commit hash.
 * You can remove the package and have `jdp` update it to the version `Pkg.add()` would pick.
-* As long as `DECLARE` contains a line fixing `METADATA` to a specific commit packages can only be updated using the versions listed therein.
+* As long as `DECLARE` contains a line fixing `METADATA` to a specific commit, packages can only be updated using the versions listed therein.
 * You can use `METADATA` corresponding to a different commit hash (simply change it), or delete the line containing `METADATA` to pull in the newest `METADATA`. 
-* You can keep a second declaration file, e.g. `DECLARE.minimal`, containing only the minumum you want to specify:
+
+If you want to only control a few packages and update the rest automatically, you can keep a second declaration file, e.g. `DECLARE.minimal`, containing only the minumum you want to specify:
+
 ```
-HDF5
+HDF5 0.4.0
+Images
 ```
-Running `cp DECLARE.minimal DECLARE; jdp` will then update everything to the newest versions, which is usefull during development. As you have `DECLARE` in your `git` repo you can always go back.
+Running `cp DECLARE.minimal DECLARE; jdp` will then update the rest of the required dependencies to the newest versions. And as you have `DECLARE` in your `git` repo you can always go back.
 
 ## Uninstall
 
-Remove the symlink to `jdp` you created, run `Pkg.rm("DeclarativePackages")` and delete all packages installed by `jdp`:
+Remove the symlink to `jdp` you created during installation, run `Pkg.rm("DeclarativePackages")` and delete all packages installed by `jdp`:
 
 ```
 chmod -R +w $HOME/.julia/declarative && rm -rf $HOME/.julia/declarative
@@ -79,4 +80,9 @@ The packages are actually installed in `$HOME/.julia/declarative/HASH/v0.x`, whe
 In addition to `JULIA_PKGDIR` the `JULIA_LOAD_PATH` is set to point to the `submodules` subdirectory of where `jdp` was invoked. This is thus a great place to put any git submodules.
 
 While cruft will accumulate over time in `$HOME/.julia/declarative`, the few MBs of disc space are a very cheap resource compared to programmer time and nerves. And, you can still simply delete that directory from time to time if you want to.
+
+## Open issues
+
+* Include a caching mechanism similar to `Pkg` to speed up installations
+* `jdp` was testet on Linux and OSX - help adapting it to Windows would be much appreciated!
 
