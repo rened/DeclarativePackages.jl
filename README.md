@@ -1,6 +1,6 @@
 **DeclarativePackages.jl**, or `jdp` for short, allows to declaratively specify which Julia packages a project should use, with exact version or commit details.
 
-`jdp` will install the specified packages (if necessary) and start 'julia' with exactly these packages available. 
+`jdp` will install the specified packages (if necessary) and start Julia with exactly these packages available. 
 
 `jdp` is heavily inspired by the [nix package manager](http://nixos.org/nix/).
 
