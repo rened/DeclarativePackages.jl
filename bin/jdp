@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# stop on error
+set -e
+
+# default for unset ENV variables
+if [ -z "$DECLARE" ]
+then
+	DECLARE=DECLARE
+fi
+if [ -z "$JULIA" ]
+then
+	JULIA=julia
+fi
+
+
+# need a declaration file
+if [ ! -e $DECLARE ]
+then
+	echo "DeclarativePackages: $DECLARE not found"
+	exit
+fi
+
+
+# set variables
+if [ `uname` == Darwin ]
+then
+	MD5="md5 -q"    
+	STAT="stat -f \"%p\""
+	STATVALUE=\"40555\"
+else
+	MD5=md5sum
+	STAT="stat -c %a"
+	STATVALUE=555
+fi
+
+HASH=`$MD5 $DECLARE | tr " " "\n" | head -n 1`
+export JULIA_PKGDIR=$HOME/.julia/declarative/$HASH
+
+# install packages if not installled yet
+if [ ! -e $JULIA_PKGDIR/v0.2/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.3/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.4/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.6/REQUIRE ]; 
+then
+	# find out where the script is:
+	# (thanks to http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in)
+
+	SOURCE="${BASH_SOURCE[0]}"
+	while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+	  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+	  SOURCE="$(readlink "$SOURCE")"
+	  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+	done
+	DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+	DECLARE=$DECLARE $JULIA $DIR/../src/installpackages.jl 
+fi
+
+
+# HASH might have changed due to DECLARE update, recompute
+HASH=`$MD5 $DECLARE | tr " " "\n" | head -n 1`
+export JULIA_PKGDIR=$HOME/.julia/declarative/$HASH
+
+# invoke julia
+$JULIA --no-startup $* 
+	
+
+
