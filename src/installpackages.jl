@@ -25,7 +25,7 @@ markreadonly(path) = run(`chmod -R a-w $path`)
 stepout(path, n) = normpath(path*"/"*repeat("../",n))
 
 function hardlinkdirs(existingpath, path) 
-	#log("hardlinking: existingpath: $existingpath\npath: $path")
+	log("hardlinking: existingpath: $existingpath\npath: $path")
 	assert(existingpath[end]=='/')
 	assert(path[end]=='/')
 	mkpath(path)
@@ -87,18 +87,7 @@ function init(lines)
 	end
     mkpath(Pkg.dir())
 	path = Pkg.dir("METADATA/")
-	if isempty(commit)
-		println("Cloning METADATA ...")
-		gitclone(url, path)
-	else
-		existingpath = existscheckout("METADATA", commit)
-		if isempty(existingpath)
-			gitclone(url, path, commit)
-		else
-			println("Linking METADATA ...")
-			hardlinkdirs(existingpath, path)
-		end
-	end
+	installorlink("METADATA", url, path, commit)
 	markreadonly(Pkg.dir("METADATA"))
 end
 
@@ -157,6 +146,16 @@ function install(packages::Array)
 	map(install, everywhere)
 end
 
+function installorlink(name, url, path, commit)
+	existingpath = existscheckout(name, commit)
+	if isempty(existingpath)
+		gitclone(url, path, commit)
+	else
+		println("Linking $(name) ...")
+		hardlinkdirs(existingpath, path)
+	end
+end
+
 function install(a::Package)
  	path = Pkg.dir(a.name*"/")
 
@@ -165,13 +164,7 @@ function install(a::Package)
 	metadatacommit(version) = strip(readall(Pkg.dir("METADATA/$(a.name)/versions/$(version[2:end])/sha1")))
 	
 	commit = a.commit == "METADATA" ? latest() : a.commit
-	existingpath = existscheckout(a.name, commit)
-	if isempty(existingpath)
-		gitclone(a.url, path, commit)
-	else
-		println("Linking $(a.name) ...")
-		hardlinkdirs(existingpath, path)
-	end
+	installorlink(a.name, a.url, path, commit)
 end
 
 function resolve(packages)
