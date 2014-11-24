@@ -10,7 +10,7 @@ You need to have `git` installed. Install the package and link `jdp` to a direct
 
 ```jl
 Pkg.add('DeclarativePackages') 
-symlink(Pkg.dir("DeclarativePackages")*"/bin/jdp",  "~/local/bin/jdp")
+symlink(Pkg.dir("DeclarativePackages")*"/bin/jdp",  "$(homedir())/local/bin/jdp")
 ```
 
 ## Usage
@@ -83,6 +83,5 @@ While cruft will accumulate over time in `$HOME/.julia/declarative`, the few MBs
 
 ## Open issues
 
-* Include a caching mechanism similar to `Pkg` to speed up installations
-* `jdp` was testet on Linux and OSX - help adapting it to Windows would be much appreciated!
+* `jdp` was tested on Linux and OSX - help adapting it to Windows would be much appreciated!
 

@@ -19,6 +19,59 @@ function readfile()
 	return lines
 end
 
+log(a) = if haskey(ENV, "DECLAREDEBUG") && ENV["DECLAREDEBUG"]=="true" println(a) end
+pkgpath(basepath, pkg) = normpath(basepath*"/v$(VERSION.major).$(VERSION.minor)/$pkg/")
+markreadonly(path) = run(`chmod -R a-w $path`)
+stepout(path, n) = normpath(path*"/"*repeat("../",n))
+
+function hardlinkdirs(existingpath, path) 
+	#log("hardlinking: existingpath: $existingpath\npath: $path")
+	assert(existingpath[end]=='/')
+	assert(path[end]=='/')
+	mkpath(path)
+	readdirabs(path) = map(x->(x, path*x), readdir(path))
+	items = readdirabs(existingpath)
+	for dir in filter(x->isdir(x[2]), items)
+	    hardlinkdirs(dir[2]*"/", path*dir[1]*"/")
+	end
+	for file in filter(x->!isdir(x[2]), items)
+		ccall( (:link, "libc"), Int, (Ptr{Uint8}, Ptr{Uint8}), file[2] , path*file[1])
+	end
+end
+
+gitcmd(path, cmd) = `git --git-dir=$path.git --work-tree=$path $(split(cmd))`
+function gitcommitof(path)
+	log("gitcommitof $path")
+	cmd = gitcmd(path, "log -n 1 --format=%H")
+	log("gitcommitof cmd $cmd")
+	r = strip(readall(cmd))
+	log("gitcommitof result $r")
+	r
+end
+
+function gitclone(url, path, commit="")
+	run(`git clone $url $path`)
+	if isempty(commit)
+		commit = gitcommitof(path)
+	end
+	gitcmd(path, "checkout --force -b pinned.$commit.tmp $commit")
+end
+
+
+function existscheckout(pkg, commit)
+	basepath = stepout(Pkg.dir(), 2)
+    dirs = readdir(basepath)
+	nontmp = filter(x->length(x)>3 && x[1:4]!="tmp_", dirs)
+    for dir in nontmp
+		path = pkgpath(basepath*dir, pkg) 
+		if exists(path) &&  gitcommitof(path) == commit
+			log("existscheckout: found $path for $pkg@$commit")
+			return path
+		end
+	end
+    return ""
+end
+
 function init(lines)
 	ENV["JULIA_PKGDIR"] = normpath(Pkg.dir()*"/../../tmp_"*randstring(32))
 	metadata = filter(x->ismatch(r"METADATA.jl", x), lines)
@@ -27,19 +80,26 @@ function init(lines)
 		assert(length(metadata)==1)
 		m = split(metadata[1])
 		url = split(metadata[1])[1]
-		length(m) > 1 ? commit = m[2] : nothing
-		println("Found URL $url for METADATA")
+		length(m) > 1 ? commit = m[2] : ""
+		log("Found URL $url$(isempty(commit) ? "" : "@$commit") for METADATA")
 	else
 		url = "https://github.com/JuliaLang/METADATA.jl.git"
 	end
-	println("Cloning METADATA ...")
     mkpath(Pkg.dir())
-	path = Pkg.dir("METADATA")
-    run(`git clone $url $path`)
-	if !isempty(commit)
-	    run(`git --git-dir=$path/.git --work-tree=$path reset --hard $commit`)
+	path = Pkg.dir("METADATA/")
+	if isempty(commit)
+		println("Cloning METADATA ...")
+		gitclone(url, path)
+	else
+		existingpath = existscheckout("METADATA", commit)
+		if isempty(existingpath)
+			gitclone(url, path, commit)
+		else
+			println("Linking METADATA ...")
+			hardlinkdirs(existingpath, path)
+		end
 	end
-	run(`chmod -R a-w $(Pkg.dir())/METADATA`)
+	markreadonly(Pkg.dir("METADATA"))
 end
 
 
@@ -75,8 +135,6 @@ function parseline(a)
 	return Package(os, name, url, commit, isregistered)
 end
 
-function checkout(url, commit)
-end
 
 type Package
 	os
@@ -100,16 +158,20 @@ function install(packages::Array)
 end
 
 function install(a::Package)
- 	path = Pkg.dir(a.name)
- 	run(`git clone $(a.url) $path`)
-	git = ["git", "--git-dir=$path/.git", "--work-tree=$path"]
+ 	path = Pkg.dir(a.name*"/")
 
 	version(a) = VersionNumber(map(int, split(a, "."))...)
-	latest() = "v"*string(maximum(map(version, readdir(Pkg.dir("METADATA/$(a.name)/versions")))))
+	latest() = "v"*string(maximum(map(version, readdir(Pkg.dir("METADATA/$(a.name)/versions/")))))
 	metadatacommit(version) = strip(readall(Pkg.dir("METADATA/$(a.name)/versions/$(version[2:end])/sha1")))
 	
-	commit = isempty(a.commit) ? strip(readall(`$git log -n 1 --format="%H"`)) : (a.commit == "METADATA" ? latest() : a.commit)
-    run(`$git checkout --force -b pinned.$commit.tmp $(a.commit == "METADATA" ? metadatacommit(commit) : commit)`)
+	commit = a.commit == "METADATA" ? latest() : a.commit
+	existingpath = existscheckout(a.name, commit)
+	if isempty(existingpath)
+		gitclone(a.url, path, commit)
+	else
+		println("Linking $(a.name) ...")
+		hardlinkdirs(existingpath, path)
+	end
 end
 
 function resolve(packages)
@@ -130,18 +192,16 @@ function finish()
 	md5 = split(md5)[1]
 	dir = normpath(Pkg.dir()*"/../../"*md5)
 
-	#@show normpath(Pkg.dir()*"/../") dir
-	try	rm(dir; recursive=true)	catch end
+	if exists(dir) rm(dir; recursive=true) end
     mv(normpath(Pkg.dir()*"/../"), dir)
 	ENV["JULIA_PKGDIR"] = dir
 
-	print("Marking $dir read only ...")
+	log("Marking $dir read-only ...")
 	run(`chmod -R 555 $dir`)
 	run(`find $dir -name .git -exec chmod -R a+w {} \;`)
 	run(`chmod 755 $dir`)
-	println(" done")
 
-	println("Finished installing packages from $(ENV["DECLARE"]).")
+	log("Finished installing packages for $(ENV["DECLARE"]).")
 end
 
 installpackages()

@@ -1,6 +1,8 @@
 module DeclarativePackages
 
-export exportDECLARE
+export exportDECLARE, exists
+
+exists(filename::String) = (s = stat(filename); s.inode!=0)
 
 type Spec
 	selector
@@ -12,12 +14,11 @@ string(a::Spec) = "$(a.selector)$(isempty(a.selector) ? "" : " ")$(a.package) $(
 function exportDECLARE(filename = "DECLARE")
 	specs, osspecific = generatespecs()
 	os = map(x -> string(x[2]), osspecific)
-	try
+	if exists(filename)
 		newselectors = unique(map(x -> x[2].selector, osspecific))
 		existingspecs = split(strip(readall(filename)), '\n')
-		keeping = filter(x -> split(x)[1][1]=='@' && !in(split(x)[1], newselectors), existingspecs)
-		append!(os, keeping)
-	catch
+		existingspecs = filter(x -> length(x)>0 && split(x)[1][1]=='@' && !in(split(x)[1], newselectors), existingspecs)
+		append!(os, existingspecs)
 	end
 	open(filename,"w") do io 
 		map(x->println(io, string(x[2])), specs)
