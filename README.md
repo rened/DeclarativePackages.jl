@@ -79,7 +79,7 @@ The packages are actually installed in `$HOME/.julia/declarative/HASH/v0.x`, whe
 
 In addition to `JULIA_PKGDIR` the `JULIA_LOAD_PATH` is set to point to the `submodules` subdirectory of where `jdp` was invoked. This is thus a great place to put any git submodules.
 
-While cruft will accumulate over time in `$HOME/.julia/declarative`, the few MBs of disc space are a very cheap resource compared to programmer time and nerves. And, you can still simply delete that directory from time to time if you want to.
+Hard links are used for packages at the same commit, resuling in very little disc space used in `$HOME/.julia/declarative`. You can delete that directory without ill-effect at any time, `jdp` will re-install packages as needed on the next invokation.
 
 ## Open issues
 
