@@ -35,7 +35,8 @@ function hardlinkdirs(existingpath, path)
 	    hardlinkdirs(dir[2]*"/", path*dir[1]*"/")
 	end
 	for file in filter(x->!isdir(x[2]), items)
-		ccall( (:link, "libc"), Int, (Ptr{Uint8}, Ptr{Uint8}), file[2] , path*file[1])
+		@osx_only ccall((:link, "libc"), Int, (Ptr{Uint8}, Ptr{Uint8}), file[2] , path*file[1])
+		@linux_only ccall((:link, "libc.so.6"), Int, (Ptr{Uint8}, Ptr{Uint8}), file[2] , path*file[1])
 	end
 end
 
