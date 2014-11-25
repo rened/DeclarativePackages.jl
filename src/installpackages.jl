@@ -27,7 +27,7 @@ markreadonly(path) = run(`chmod -R a-w $path`)
 stepout(path, n) = normpath(path*"/"*repeat("../",n))
 
 function hardlinkdirs(existingpath, path) 
-	log(2, "hardlinking: existingpath: $existingpath\npath: $path")
+	log(3, "hardlinking: existingpath: $existingpath\npath: $path")
 	assert(existingpath[end]=='/')
 	assert(path[end]=='/')
 	mkpath(path)
@@ -53,11 +53,26 @@ function gitcommitof(path)
 	r
 end
 
-function gitclone(url, path, commit="")
+function gitclone(name, url, path, commit="")
+	log(2, "gitclone: name: $name url: $url path: $path commit: $commit")
 	run(`git clone $url $path`)
 	if isempty(commit)
 		commit = gitcommitof(path)
+	else
+		# check if the repo knows this commit. if not, check in METADATA
+		isknown = ismatch(Regex(commit), readall(gitcmd(path, "tag")))
+		if !isknown
+			filename = Pkg.dir("METADATA/$name/versions/$(commit[2:end])/sha1")
+			if exists(filename)
+				commit = strip(readall(filename))
+			else
+				if commit[1] == 'v'
+					error("gitclone: Could not find a commit hash for version $commit for package $name ($url)")
+				end
+			end
+		end
 	end
+		
 	run(gitcmd(path, "checkout --force -b pinned.$commit.tmp $commit"))
 end
 
@@ -98,7 +113,7 @@ end
 
 parselines(lines) = filter(x->isa(x,Package), map(parseline, lines))
 function parseline(a)
-	parts = split(a)
+	parts = split(strip(a))
 
 	if parts[1][1] == '@'
 		os = parts[1]
@@ -154,9 +169,7 @@ function installorlink(name, url, path, commit)
 	log(2, "Installorlink: $name $url $commit $path")
 	existingpath = existscheckout(name, commit)
 	if isempty(existingpath)
-		if name == "METADATA" || (!isempty(commit) && commit[1]!='v')
-			gitclone(url, path, commit)
-		end
+		gitclone(name, url, path, commit)
 	else
 		log(1, "Linking $(name) ...")
 		hardlinkdirs(existingpath, path)
@@ -187,6 +200,7 @@ function resolve(packages)
 			write(io, "$(pkg.os) $(pkg.name) $versions\n")
 		end
 	end
+	log(1, "Invoking Pkg.resolve() ...")
 	Pkg.resolve()
 end
 

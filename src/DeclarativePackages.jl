@@ -52,6 +52,7 @@ function generatespecs()
 		url = strip(readall(`$git config --get remote.origin.url`))
 		metaurl = ""
 		try metaurl = strip(readall(Pkg.dir("METADATA")*"/$pkg/url")) catch end
+		log(2, "generatespecs: url: $url  metaurl: $metaurl")
 		if url==metaurl
 			url = pkg
 		end
@@ -64,6 +65,7 @@ function generatespecs()
 		if isahead
 			error("Cannot create a jdp declaration from the currently installed packages as '$pkg' has local commits ahead of origin.\nPush those commits, then run 'jdp' again.")
 		end
+		log(2, "generatespecs: pkg: $pkg getsel: $(getsel(pkg)) url: $url")
 		list = isempty(getsel(pkg)) ? (url ==  pkg ? metapkgs : giturls) : osspecific 
 		push!(list, (pkg, Spec(getsel(pkg), url, onversion ? version[2:end] : commit)))
 	end
