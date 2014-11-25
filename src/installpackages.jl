@@ -1,6 +1,10 @@
 include("DeclarativePackages.jl")
 using DeclarativePackages
 
+if !haskey(ENV, "DECLARE_VERBOSITY")
+	ENV["DECLARE_VERBOSITY"] = 1
+end
+
 function installpackages()
 	lines = readfile()
     init(lines)
@@ -11,21 +15,19 @@ function installpackages()
 end
 
 function readfile()
-	print("Parsing $(ENV["DECLARE"]) ... ")
+	log(1, "Parsing $(ENV["DECLARE"]) ... ")
 	lines = split(readall(ENV["DECLARE"]), '\n')
 	lines = map(x->replace(x, r"#.*", ""), lines)
 	lines = filter(x->!isempty(x), lines)
-	println("ok")
 	return lines
 end
 
-log(a) = if haskey(ENV, "DECLAREDEBUG") && ENV["DECLAREDEBUG"]=="true" println(a) end
 pkgpath(basepath, pkg) = normpath(basepath*"/v$(VERSION.major).$(VERSION.minor)/$pkg/")
 markreadonly(path) = run(`chmod -R a-w $path`)
 stepout(path, n) = normpath(path*"/"*repeat("../",n))
 
 function hardlinkdirs(existingpath, path) 
-	log("hardlinking: existingpath: $existingpath\npath: $path")
+	log(2, "hardlinking: existingpath: $existingpath\npath: $path")
 	assert(existingpath[end]=='/')
 	assert(path[end]=='/')
 	mkpath(path)
@@ -40,13 +42,14 @@ function hardlinkdirs(existingpath, path)
 	end
 end
 
+
 gitcmd(path, cmd) = `git --git-dir=$path.git --work-tree=$path $(split(cmd))`
 function gitcommitof(path)
-	log("gitcommitof $path")
+	log(2, "gitcommitof $path")
 	cmd = gitcmd(path, "log -n 1 --format=%H")
-	log("gitcommitof cmd $cmd")
+	log(2, "gitcommitof cmd $cmd")
 	r = strip(readall(cmd))
-	log("gitcommitof result $r")
+	log(2, "gitcommitof result $r")
 	r
 end
 
@@ -55,7 +58,7 @@ function gitclone(url, path, commit="")
 	if isempty(commit)
 		commit = gitcommitof(path)
 	end
-	gitcmd(path, "checkout --force -b pinned.$commit.tmp $commit")
+	run(gitcmd(path, "checkout --force -b pinned.$commit.tmp $commit"))
 end
 
 
@@ -66,7 +69,7 @@ function existscheckout(pkg, commit)
     for dir in nontmp
 		path = pkgpath(basepath*dir, pkg) 
 		if exists(path) &&  gitcommitof(path) == commit
-			log("existscheckout: found $path for $pkg@$commit")
+			log(2, "existscheckout: found $path for $pkg@$commit")
 			return path
 		end
 	end
@@ -82,7 +85,7 @@ function init(lines)
 		m = split(metadata[1])
 		url = split(metadata[1])[1]
 		length(m) > 1 ? commit = m[2] : ""
-		log("Found URL $url$(isempty(commit) ? "" : "@$commit") for METADATA")
+		log(2, "Found URL $url$(isempty(commit) ? "" : "@$commit") for METADATA")
 	else
 		url = "https://github.com/JuliaLang/METADATA.jl.git"
 	end
@@ -148,11 +151,14 @@ function install(packages::Array)
 end
 
 function installorlink(name, url, path, commit)
+	log(2, "Installorlink: $name $url $commit $path")
 	existingpath = existscheckout(name, commit)
 	if isempty(existingpath)
-		gitclone(url, path, commit)
+		if name == "METADATA" || (!isempty(commit) && commit[1]!='v')
+			gitclone(url, path, commit)
+		end
 	else
-		println("Linking $(name) ...")
+		log(1, "Linking $(name) ...")
 		hardlinkdirs(existingpath, path)
 	end
 end
@@ -171,7 +177,14 @@ end
 function resolve(packages)
 	open(Pkg.dir()*"/REQUIRE","w") do io
 		for pkg in packages
-			write(io, "$(pkg.os) $(pkg.name)\n")
+			if !isempty(pkg.commit) && pkg.commit[1]=='v'
+				m,n,o = map(int, split(pkg.commit[2:end], '.'))
+				versions = "$m.$n.$o $m.$n.$(o+1)-"
+			else
+				versions = ""
+			end
+			log(3, "writing REQUIRE: $(pkg.os) $(pkg.name) $versions\n")
+			write(io, "$(pkg.os) $(pkg.name) $versions\n")
 		end
 	end
 	Pkg.resolve()
@@ -186,16 +199,19 @@ function finish()
 	md5 = split(md5)[1]
 	dir = normpath(Pkg.dir()*"/../../"*md5)
 
-	if exists(dir) rm(dir; recursive=true) end
+	if exists(dir) 
+		run(`chmod -R a+w $dir`)
+		rm(dir; recursive=true)
+	end
     mv(normpath(Pkg.dir()*"/../"), dir)
 	ENV["JULIA_PKGDIR"] = dir
 
-	log("Marking $dir read-only ...")
+	log(1, "Marking $dir read-only ...")
 	run(`chmod -R 555 $dir`)
 	run(`find $dir -name .git -exec chmod -R a+w {} \;`)
 	run(`chmod 755 $dir`)
 
-	log("Finished installing packages for $(ENV["DECLARE"]).")
+	log(1, "Finished installing packages for $(ENV["DECLARE"]).")
 end
 
 installpackages()

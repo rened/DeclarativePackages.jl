@@ -1,8 +1,10 @@
 module DeclarativePackages
 
-export exportDECLARE, exists
+export exportDECLARE, exists, log
 
 exists(filename::String) = (s = stat(filename); s.inode!=0)
+
+log(level, a) = if haskey(ENV, "DECLARE_VERBOSITY") && int(ENV["DECLARE_VERBOSITY"])>=level println(a) end
 
 type Spec
 	selector
@@ -13,6 +15,9 @@ string(a::Spec) = "$(a.selector)$(isempty(a.selector) ? "" : " ")$(a.package) $(
 
 function exportDECLARE(filename = "DECLARE")
 	specs, osspecific = generatespecs()
+	log(2, "exportDECLARE: $specs")
+	log(2, "exportDECLARE: $osspecific")
+
 	os = map(x -> string(x[2]), osspecific)
 	if exists(filename)
 		newselectors = unique(map(x -> x[2].selector, osspecific))
@@ -32,7 +37,7 @@ function generatespecs()
 	packages = filter(x->x!="DeclarativePackages", packages)
 	push!(packages, "METADATA")
 
- 	requires = map(x->readall(Pkg.dir(first(x))*"/REQUIRE"), Pkg.installed())
+	requires = map(x->try readall(Pkg.dir(first(x))*"/REQUIRE") catch "" end, Pkg.installed())
 	requires = unique(vcat(map(x->collect(split(x,'\n')), requires)...))
 	requires = filter(x->!isempty(x) && !ismatch(r"^julia", x), requires)
 	selectors = Dict(map(x->split(x)[end], requires), map(x->x[1]=='@' ? split(x)[1] : "", requires))
