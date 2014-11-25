@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/rened/DeclarativePackages.jl.png)](https://travis-ci.org/rened/DeclarativePackages.jl)
+
 **DeclarativePackages.jl**, or `jdp` for short, allows to declaratively specify which Julia packages a project should use, with exact version or commit details.
 
 `jdp` will install the specified packages (if necessary) and start Julia with exactly these packages available. 
