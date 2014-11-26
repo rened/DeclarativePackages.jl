@@ -40,12 +40,18 @@ function generatespecs()
 	requires = map(x->try readall(Pkg.dir(first(x))*"/REQUIRE") catch "" end, Pkg.installed())
 	requires = unique(vcat(map(x->collect(split(x,'\n')), requires)...))
 	requires = filter(x->!isempty(x) && !ismatch(r"^julia", x), requires)
-	selectors = Dict(map(x->split(x)[end], requires), map(x->x[1]=='@' ? split(x)[1] : "", requires))
+	a = map(x->split(x)[end], requires)
+	b = map(x->x[1]=='@' ? split(x)[1] : "", requires)
+	if VERSION < v"0.4"
+		selectors = Dict(a,b)
+	else
+		selectors = Dict{Any,Any}(zip(a,b))
+	end
 	getsel(pkg) = haskey(selectors, pkg) ? selectors[pkg] : ""
  
-	metapkgs = Dict()
-	giturls = Dict()
-	osspecific = Dict()
+	metapkgs = (ASCIIString,Spec)[]
+	giturls = (ASCIIString,Spec)[]
+	osspecific = (ASCIIString,Spec)[]
 	for pkg in packages
 		dir = Pkg.dir(pkg)
 		git = ["git", "--git-dir=$dir/.git"]
@@ -70,7 +76,7 @@ function generatespecs()
 		push!(list, (pkg, Spec(getsel(pkg), url, onversion ? version[2:end] : commit)))
 	end
 
-	specs = Dict()
+	specs = (ASCIIString,Spec)[]
 	if !(isempty(metapkgs))
 		append!(specs, metapkgs[sortperm(map(first,metapkgs))])
 	end
