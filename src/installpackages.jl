@@ -202,9 +202,11 @@ function resolve(packages, needbuilding)
 			write(io, "$(pkg.os) $(pkg.name) $versions\n")
 
 			# add test dependencies
-			testrequire = Pkg.dir(pkg.name*"/test/REQUIRE")
-			if exists(testrequire)
-				write(io, readall(testrequire))
+			if haskey(ENV, "DECLARE_INCLUDETEST") && ENV["DECLARE_INCLUDETEST"]=="true"
+				testrequire = Pkg.dir(pkg.name*"/test/REQUIRE")
+				if exists(testrequire)
+					write(io, readall(testrequire))
+				end
 			end
 		end
 	end
@@ -220,6 +222,9 @@ function finish()
     @osx_only md5 = strip(readall(`md5 -q $(ENV["DECLARE"])`))
     @linux_only md5 = strip(readall(`md5sum $(ENV["DECLARE"])`))
 	md5 = split(md5)[1]
+	if haskey(ENV, "DECLARE_INCLUDETEST") && ENV["DECLARE_INCLUDETEST"]=="true"
+		md5 = md5*"withtest"
+	end
 	dir = normpath(Pkg.dir()*"/../../"*md5)
 
 	if exists(dir) 

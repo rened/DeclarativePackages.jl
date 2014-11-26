@@ -63,6 +63,15 @@ Images
 ```
 Running `cp DECLARE.minimal DECLARE; jdp` will then update the rest of the required dependencies to the newest versions. And as you have `DECLARE` in your `git` repo, you can always go back.
 
+### Parameters
+
+`jdp` can be influenced using the following environment variables:
+
+`JULIA` -- path of the Julia executable
+`DECLARE` -- path of the DECLARE file to be used
+`DECLARE_VERBOSITY` -- control dignostic output. 0==quiet, 1==default, 2==debug, 3==chatty
+`DECLARE_INCLUDETEST` -- in all dependencies in the packages' `test/REQUIRE` files
+
 ## Uninstall
 
 Remove the symlink to `jdp` you created during installation, run `Pkg.rm("DeclarativePackages")` and delete all packages installed by `jdp`:

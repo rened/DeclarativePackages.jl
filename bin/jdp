@@ -12,6 +12,16 @@ if [ -z "$JULIA" ]
 then
 	JULIA=julia
 fi
+if [ -z "$DECLARE_INCLUDETEST" ]
+then
+	DECLARE_INCLUDETEST=""
+fi
+if [ -e "$DECLARE_INCLUDETEST" ] && [ $DECLARE_INCLUDETEST == "true" ]
+then
+	TESTSUFFIX="withtest"
+else
+	TESTSUFFIX=""
+fi
 
 
 # need a declaration file
@@ -35,7 +45,7 @@ else
 fi
 
 HASH=`$MD5 $DECLARE | tr " " "\n" | head -n 1`
-export JULIA_PKGDIR=$HOME/.julia/declarative/$HASH
+export JULIA_PKGDIR=$HOME/.julia/declarative/$HASH$TESTSUFFIX
 
 # install packages if not installled yet
 if [ ! -e $JULIA_PKGDIR/v0.2/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.3/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.4/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.6/REQUIRE ]; 
@@ -57,7 +67,7 @@ fi
 
 # HASH might have changed due to DECLARE update, recompute
 HASH=`$MD5 $DECLARE | tr " " "\n" | head -n 1`
-export JULIA_PKGDIR=$HOME/.julia/declarative/$HASH
+export JULIA_PKGDIR=$HOME/.julia/declarative/$HASH$TESTSUFFIX
 
 # invoke julia
 $JULIA --no-startup $* 
