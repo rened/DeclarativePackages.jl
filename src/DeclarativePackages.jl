@@ -43,9 +43,9 @@ function generatespecs()
 	selectors = Dict(map(x->split(x)[end], requires), map(x->x[1]=='@' ? split(x)[1] : "", requires))
 	getsel(pkg) = haskey(selectors, pkg) ? selectors[pkg] : ""
  
-	metapkgs = {}
-	giturls = {}
-	osspecific = {}
+	metapkgs = Dict()
+	giturls = Dict()
+	osspecific = Dict()
 	for pkg in packages
 		dir = Pkg.dir(pkg)
 		git = ["git", "--git-dir=$dir/.git"]
@@ -70,7 +70,7 @@ function generatespecs()
 		push!(list, (pkg, Spec(getsel(pkg), url, onversion ? version[2:end] : commit)))
 	end
 
-	specs = {}
+	specs = Dict()
 	if !(isempty(metapkgs))
 		append!(specs, metapkgs[sortperm(map(first,metapkgs))])
 	end
