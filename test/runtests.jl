@@ -35,12 +35,12 @@ test("METADATA1", runjdp("DECLARE.METADATA1"), x->x[1] == "")
 test("METADATA2", runjdp("DECLARE.METADATA2"), x->x[1] == "")
 test("JSON1", runjdp("DECLARE.JSON1"), x->x[1]=="JSON 0.3.9\n")
 test("JSON2", runjdp("DECLARE.JSON2"), x->x[1]=="JSON 0.3.7\n")
-test("HDF51", runjdp("DECLARE.HDF5_1"), x->ismatch(r"HDF5 0\.4\.5",x[1]) && !ismatch(r"DataFrames", x[1]))
+test("HDF51", runjdp("DECLARE.HDF5_1"), x->ismatch(r"HDF5 0\.4\.5",x[1]) && !ismatch(r"DataFrames", x[2]))
 test("HDF52", runjdp("DECLARE.HDF5_2"), x->ismatch(r"HDF5 0\.4\.5",x[1]) && ismatch(r"DeclarativePackages 0\.0\.0-",x[1]))
 test("HDF53", runjdp("DECLARE.HDF5_3"), x->ismatch(r"rened/HDF5",x[2]))
 test("HDF54", runjdp("DECLARE.HDF5_4"), x->ismatch(r"HDF5 0\.4\.5",x[1]) && ismatch(r"rened/HDF5", x[2]))
 ENV["DECLARE_INCLUDETEST"] = "true"
-test("HDF55_withtest", runjdp("DECLARE.HDF5_1"), x->ismatch(r"DataFrames",x[1]))
+test("HDF55_withtest", runjdp("DECLARE.HDF5_1"), x->ismatch(r"DataFrames",x[2]))
 
 if !existinginstallation
 	run(`chmod -R a+w $decdir`)
