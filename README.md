@@ -8,10 +8,10 @@
 
 ## Installation
 
-You need to have `git` installed. Install the package and link `jdp` to a directly on your `PATH`, for example, for example in `~/local/bin`:
+You need to have `git` installed. Install the package and link `jdp` directly on your `PATH`, for example, for example in `~/local/bin`:
 
 ```jl
-Pkg.add('DeclarativePackages') 
+Pkg.add("DeclarativePackages") 
 symlink(Pkg.dir("DeclarativePackages")*"/bin/jdp",  "$(homedir())/local/bin/jdp")
 ```
 
