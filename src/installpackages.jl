@@ -9,8 +9,8 @@ function installpackages()
 	lines = readfile()
     init(lines)
     packages = parselines(lines)
-    install(packages)
-	resolve(packages)
+    needbuilding = install(packages)
+	resolve(packages, needbuilding)
 	finish()
 end
 
@@ -162,7 +162,7 @@ function install(packages::Array)
 	@unix_only map(install, unix)
 	@linux_only map(install, linux)
 	@windows_only map(install, windows)
-	map(install, everywhere)
+	needbuilding = filter(x->x!=nothing, map(install, everywhere))
 end
 
 function installorlink(name, url, path, commit)
@@ -170,9 +170,11 @@ function installorlink(name, url, path, commit)
 	existingpath = existscheckout(name, commit)
 	if isempty(existingpath)
 		gitclone(name, url, path, commit)
+		return name
 	else
 		log(1, "Linking $(name) ...")
 		hardlinkdirs(existingpath, path)
+		return
 	end
 end
 
@@ -187,7 +189,7 @@ function install(a::Package)
 	installorlink(a.name, a.url, path, commit)
 end
 
-function resolve(packages)
+function resolve(packages, needbuilding)
 	open(Pkg.dir()*"/REQUIRE","w") do io
 		for pkg in packages
 			if !isempty(pkg.commit) && pkg.commit[1]=='v'
@@ -198,10 +200,17 @@ function resolve(packages)
 			end
 			log(3, "writing REQUIRE: $(pkg.os) $(pkg.name) $versions\n")
 			write(io, "$(pkg.os) $(pkg.name) $versions\n")
+
+			# add test dependencies
+			testrequire = Pkg.dir(pkg.name*"/test/REQUIRE")
+			if exists(testrequire)
+				write(io, readall(testrequire))
+			end
 		end
 	end
 	log(1, "Invoking Pkg.resolve() ...")
 	Pkg.resolve()
+	map(x -> Pkg.build(x), needbuilding)
 end
 
 
