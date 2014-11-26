@@ -49,9 +49,9 @@ function generatespecs()
 	end
 	getsel(pkg) = haskey(selectors, pkg) ? selectors[pkg] : ""
  
-	metapkgs = (ASCIIString,Spec)[]
-	giturls = (ASCIIString,Spec)[]
-	osspecific = (ASCIIString,Spec)[]
+	metapkgs = Any[]
+	giturls = Any[]
+	osspecific = Any[]
 	for pkg in packages
 		dir = Pkg.dir(pkg)
 		git = ["git", "--git-dir=$dir/.git"]
@@ -76,7 +76,7 @@ function generatespecs()
 		push!(list, (pkg, Spec(getsel(pkg), url, onversion ? version[2:end] : commit)))
 	end
 
-	specs = (ASCIIString,Spec)[]
+	specs = Any[]
 	if !(isempty(metapkgs))
 		append!(specs, metapkgs[sortperm(map(first,metapkgs))])
 	end
