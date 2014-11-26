@@ -24,7 +24,7 @@ end
 
 pkgpath(basepath, pkg) = normpath(basepath*"/v$(VERSION.major).$(VERSION.minor)/$pkg/")
 markreadonly(path) = run(`chmod -R a-w $path`)
-stepout(path, n) = normpath(path*"/"*repeat("../",n))
+stepout(path, n=1) = normpath(path*"/"*repeat("../",n))
 
 function hardlinkdirs(existingpath, path) 
 	log(3, "hardlinking: existingpath: $existingpath\npath: $path")
@@ -92,7 +92,8 @@ function existscheckout(pkg, commit)
 end
 
 function init(lines)
-	ENV["JULIA_PKGDIR"] = normpath(Pkg.dir()*"/../../tmp_"*randstring(32))
+	tmpdir = randstring(32)
+	ENV["JULIA_PKGDIR"] = normpath(Pkg.dir()*"/../../$tmpdir")
 	metadata = filter(x->ismatch(r"METADATA.jl", x), lines)
 	commit = ""
 	if length(metadata)>0
@@ -226,12 +227,13 @@ function finish()
 		md5 = md5*"withtest"
 	end
 	dir = normpath(Pkg.dir()*"/../../"*md5)
-
+    
 	if exists(dir) 
 		run(`chmod -R a+w $dir`)
 		rm(dir; recursive=true)
 	end
-    mv(normpath(Pkg.dir()*"/../"), dir)
+    mv(stepout(Pkg.dir(),1), dir)
+	symlink(dir, stepout(Pkg.dir())[1:end-1])
 	ENV["JULIA_PKGDIR"] = dir
 
 	log(1, "Marking $dir read-only ...")

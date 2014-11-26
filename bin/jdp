@@ -16,7 +16,7 @@ if [ -z "$DECLARE_INCLUDETEST" ]
 then
 	DECLARE_INCLUDETEST=""
 fi
-if [ -e "$DECLARE_INCLUDETEST" ] && [ $DECLARE_INCLUDETEST == "true" ]
+if [ ! -z "$DECLARE_INCLUDETEST" ] && [ $DECLARE_INCLUDETEST == "true" ]
 then
 	TESTSUFFIX="withtest"
 else
