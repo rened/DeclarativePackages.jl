@@ -40,7 +40,7 @@ test("HDF52", runjdp("DECLARE.HDF5_2"), x->ismatch(r"HDF5 0\.4\.5",x[1]) && isma
 test("HDF53", runjdp("DECLARE.HDF5_3"), x->ismatch(r"rened/HDF5",x[2]))
 test("HDF54", runjdp("DECLARE.HDF5_4"), x->ismatch(r"HDF5 0\.4\.5",x[1]) && ismatch(r"rened/HDF5", x[2]))
 ENV["DECLARE_INCLUDETEST"] = "true"
-test("HDF51", runjdp("DECLARE.HDF5_1"), x->ismatch(r"DataFrames",x[1]))
+test("HDF55_withtest", runjdp("DECLARE.HDF5_1"), x->ismatch(r"DataFrames",x[1]))
 
 if !existinginstallation
 	run(`chmod -R a+w $decdir`)
