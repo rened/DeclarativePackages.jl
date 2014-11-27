@@ -35,7 +35,7 @@ https://github.com/jakebolewski/LibGit2.jl.git dcbf6f2419f92edeae4014f0a293c66a3
 You can change both the name of the `DECLARE` file as well as the `julia` binary called via environment variables. All arguments after `jdp` will be passed on to Julia:
 
 ```bash
-DECLARE=mydeclarations.txt JULIA=/usr/bin/juliafromgit jdp -e "println(123)"
+DECLARE=mydeclarations.txt DECLARE_JULIA=/usr/bin/juliafromgit jdp -e "println(123)"
 ```
 If you would like to start with `DECLARE` based on your currently installed packages, run:
 
@@ -67,7 +67,7 @@ Running `cp DECLARE.minimal DECLARE; jdp` will then update the rest of the requi
 
 `jdp` can be influenced using the following environment variables:
 
-* `JULIA` - path of the Julia executable
+* `DECLARE_JULIA` - path of the Julia executable
 * `DECLARE` - path of the DECLARE file to be used
 * `DECLARE_VERBOSITY` - control dignostic output. 0==quiet, 1==default, 2==debug, 3==chatty
 * `DECLARE_INCLUDETEST` - include all dependencies in the packages' `test/REQUIRE` files
