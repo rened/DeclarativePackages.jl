@@ -11,7 +11,7 @@
 You need to have `git` installed. Install the package and link `jdp` into a directory on your `PATH`, for example, for example in `~/local/bin`:
 
 ```jl
-Pkg.clone("DeclarativePackages") 
+Pkg.add("DeclarativePackages") 
 symlink(Pkg.dir("DeclarativePackages")*"/bin/jdp",  "$(homedir())/local/bin/jdp")
 ```
 
