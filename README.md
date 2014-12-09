@@ -37,6 +37,12 @@ You can change both the name of the `DECLARE` file as well as the `julia` binary
 ```bash
 DECLARE=mydeclarations.txt DECLARE_JULIA=/usr/bin/juliafromgit jdp -e "println(123)"
 ```
+To launch IJulia make sure that `IJulia` is listed in your `DECLARE` file and start Julia like this:
+
+```bash
+jdp -e "using IJulia; notebook()"
+```
+
 If you would like to start with `DECLARE` based on your currently installed packages, run:
 
 ```bash
