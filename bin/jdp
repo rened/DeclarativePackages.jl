@@ -70,7 +70,11 @@ HASH=`$MD5 $DECLARE | tr " " "\n" | head -n 1`
 export JULIA_PKGDIR=$HOME/.julia/declarative/$HASH$TESTSUFFIX
 
 # invoke julia
-$DECLARE_JULIA --no-startup "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
+if [ "$#" -eq 0 ]; then
+	$DECLARE_JULIA --no-startup
+else
+	$DECLARE_JULIA --no-startup "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
+fi
 	
 
 
