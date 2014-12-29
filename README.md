@@ -43,7 +43,7 @@ To launch IJulia make sure that `IJulia` is listed in your `DECLARE` file and st
 jdp -e "using IJulia; notebook()"
 ```
 
-If you would like to start with `DECLARE` based on your currently installed packages, run:
+If you would like to initially create a `DECLARE` file based on your currently installed packages, run:
 
 ```bash
 julia -e "using DeclarativePackages; exportDECLARE()"
