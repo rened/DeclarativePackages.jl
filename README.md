@@ -57,7 +57,7 @@ You will see that your `DECLARE` files get auto-updated if not all packages deta
 There are several ways to update a package by editing `DECLARE`:
 
 * You can change the version number or commit hash.
-* You can remove the package and have `jdp` update it to the version `Pkg.add()` would pick.
+* You can remove the package and, in the case that another package requires it, have `jdp` update it to the version `Pkg.add()` would pick.
 * As long as `DECLARE` contains a line fixing `METADATA` to a specific commit, packages can only be updated using the versions listed therein.
 * You can use `METADATA` corresponding to a different commit hash (simply change it), or delete the line containing `METADATA` to pull in the newest `METADATA`. 
 
