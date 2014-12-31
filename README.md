@@ -94,7 +94,7 @@ Normally, Julia has a global, mutable state of installed packages in `$HOME/.jul
 
 The packages are actually installed in `$HOME/.julia/declarative/HASH/v0.x`, where `HASH` is the md5 hash over the contents of the `DECLARE` file.
 
-In addition to `JULIA_PKGDIR` Julia's `LOAD_PATH` is set to include the `src` and `modules` subdirectories of where `jdp` was invoked. The first is handy when working on a module while the second is a great place to put any git submodules.
+In addition to `JULIA_PKGDIR` Julia's `LOAD_PATH` is set to include the `src`, `modules` and `submodules` subdirectories of where `jdp` was invoked. The first is handy when working on a module while the second or third are a great places to put any git submodules.
 
 Hard links are used for packages at the same commit, resuling in very little disc space used in `$HOME/.julia/declarative`. You can delete that directory without ill-effect at any time, `jdp` will re-install packages as needed on the next invokation.
 
