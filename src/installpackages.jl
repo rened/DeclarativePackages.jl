@@ -183,7 +183,14 @@ function install(a::Package)
  	path = Pkg.dir(a.name*"/")
 
 	version(a) = VersionNumber(map(int, split(a, "."))...)
-	latest() = "v"*string(maximum(map(version, readdir(Pkg.dir("METADATA/$(a.name)/versions/")))))
+	function latest()
+        versionsdir = Pkg.dir("METADATA/$(a.name)/versions/")
+        if exists(versionsdir)
+            "v"*string(maximum(map(version, readdir(versionsdir))))
+        else
+            ""
+        end
+    end
 	metadatacommit(version) = strip(readall(Pkg.dir("METADATA/$(a.name)/versions/$(version[2:end])/sha1")))
 	
 	commit = a.commit == "METADATA" ? latest() : a.commit
