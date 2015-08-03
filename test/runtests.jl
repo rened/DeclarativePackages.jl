@@ -20,14 +20,14 @@ end
 decdir = "$(homedir())/.julia/declarative/"
 existinginstallation = exists(decdir)
 
-jdp = Pkg.dir("DeclarativePackages/bin/jdp")
+pathof(a...) = joinpath(dirname(@__FILE__), "..",a...)
+jdp = pathof("bin/jdp")
 function runjdp(file)
-    file = Pkg.dir("DeclarativePackages")*"/test/"*file
-    listpackages = Pkg.dir("DeclarativePackages")*"/test/listpackages.jl"
+    file = pathof("test",file)
+    listpackages = pathof("test/listpackages.jl")
 
     println("Testing $file")
     tmp = tempname()
-    run(`touch $tmp`)
     cp(file, tmp)
     ENV["DECLARE"] = tmp
     ENV["DECLARE_VERBOSITY"] = 0
@@ -40,8 +40,8 @@ ENV["DECLARE_INCLUDETEST"] = ""
 test("empty", runjdp("DECLARE.empty"), x->isempty(x[1]))
 test("METADATA1", runjdp("DECLARE.METADATA1"), x->isempty(x[1]))
 test("METADATA2", runjdp("DECLARE.METADATA2"), x->isempty(x[1]))
-test("JSON1", runjdp("DECLARE.JSON1"), x->x[1]=="JSON 0.3.9")
-test("JSON2", runjdp("DECLARE.JSON2"), x->x[1]=="JSON 0.3.7")
+test("JSON1", runjdp("DECLARE.JSON1"), x->ismatch(r"JSON 0.3.9",x[2]))
+test("JSON2", runjdp("DECLARE.JSON2"), x->ismatch(r"JSON 0.3.7",x[2]))
 test("HDF51", runjdp("DECLARE.HDF5_1"), x->ismatch(r"HDF5 0\.4\.5",x[1]) && !ismatch(r"DataFrames", x[2]))
 test("HDF52", runjdp("DECLARE.HDF5_2"), x->ismatch(r"HDF5 0\.4\.5",x[1]) && ismatch(r"DeclarativePackages 0\.0\.0-",x[1]))
 test("HDF53", runjdp("DECLARE.HDF5_3"), x->ismatch(r"rened/HDF5",x[2]))
