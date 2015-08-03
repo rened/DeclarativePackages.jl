@@ -179,14 +179,10 @@ function installorlink(name, url, path, commit)
     end
 end
 
-if VERSION.minor == 4
-    int(x) = parse(Int,x)
-end
-
 function install(a::Package)
     path = Pkg.dir(a.name*"/")
 
-    version(a) = VersionNumber(map(int, split(a, "."))...)
+    version(a) = VersionNumber(map(x->parse(Int,x), split(a, "."))...)
     function latest()
         versionsdir = Pkg.dir("METADATA/$(a.name)/versions/")
         if exists(versionsdir)
@@ -205,7 +201,7 @@ function resolve(packages, needbuilding)
     open(Pkg.dir()*"/REQUIRE","w") do io
         for pkg in packages
             if !isempty(pkg.commit) && pkg.commit[1]=='v'
-                m,n,o = map(int, split(pkg.commit[2:end], '.'))
+                m,n,o = map(x->parse(Int,x), split(pkg.commit[2:end], '.'))
                 versions = "$m.$n.$o $m.$n.$(o+1)-"
             else
                 versions = ""

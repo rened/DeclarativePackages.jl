@@ -7,6 +7,10 @@ exists(filename::String) = (s = stat(filename); s.inode!=0)
 import Base.log
 log(level, a) = if haskey(ENV, "DECLARE_VERBOSITY") && parse(Int,ENV["DECLARE_VERBOSITY"])>=level println(a) end
 
+if VERSION < v"0.4.0-dev+3874"
+    Base.parse{T<:Integer}(::Type{T}, s::String) = parseint(T, s)
+end
+
 type Spec
     selector
     package
