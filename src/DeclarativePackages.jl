@@ -1,5 +1,7 @@
 module DeclarativePackages
 
+using Compat
+
 export exportDECLARE, exists, log
 
 exists(filename::String) = (s = stat(filename); s.inode!=0)
