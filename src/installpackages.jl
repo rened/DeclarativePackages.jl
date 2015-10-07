@@ -244,7 +244,8 @@ function finish()
     ENV["JULIA_PKGDIR"] = dir
 
     log(1, "Marking $dir read-only ...")
-    run(`chmod 555 $dir`)
+    run(pipeline(`find $dir -maxdepth 1`,`xargs chmod 555 `))
+    run(`chmod 755 $dir`)
 
     log(1, "Finished installing packages for $(ENV["DECLARE"]).")
 end
