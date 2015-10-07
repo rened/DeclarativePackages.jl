@@ -23,7 +23,7 @@ function readfile()
 end
 
 pkgpath(basepath, pkg) = normpath(basepath*"/v$(VERSION.major).$(VERSION.minor)/$pkg/")
-markreadonly(path) = run(`chmod -R a-w $path`)
+markreadonly(path) = run(`chmod a-w $path`)
 stepout(path, n=1) = normpath(path*"/"*repeat("../",n))
 
 function hardlinkdirs(existingpath, path) 
@@ -244,9 +244,7 @@ function finish()
     ENV["JULIA_PKGDIR"] = dir
 
     log(1, "Marking $dir read-only ...")
-    run(`chmod -R 555 $dir`)
-    run(`find $dir -name .git -exec chmod -R a+w {} \;`)
-    run(`chmod 755 $dir`)
+    run(`chmod 555 $dir`)
 
     log(1, "Finished installing packages for $(ENV["DECLARE"]).")
 end
