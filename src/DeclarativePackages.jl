@@ -64,11 +64,12 @@ function generatespecs()
             url = pkg
         end
         commit = strip(readall(`$git log -n 1 --format="%H"`))
-        remote = strip(readall(`$git remote`))
-        branch = strip(readall(`$git rev-parse --abbrev-ref HEAD`))
+        # remote = strip(readall(`$git remote`))
+        # remote = split(remote)[end]
+        # branch = strip(readall(`$git rev-parse --abbrev-ref HEAD`))
         version = split(strip(readall(`$git name-rev --tags --name-only $commit`)),"^")[1]
         onversion = version != "undefined"
-        isahead = ismatch(r"^pinned.*tmp", branch) ? false : !isempty(strip(readall(`$git log $remote/$branch..HEAD`)))
+        # isahead = ismatch(r"^pinned.*tmp", branch) ? false : !isempty(strip(readall(`$git log $remote/$branch..HEAD`)))
         status = split(strip(readall(`$git status -s`)), "\n")
         status = filter(x->!ismatch(r"deps.jl",x) && length(x)>0, status)
         isdirty = length(status) > 0
