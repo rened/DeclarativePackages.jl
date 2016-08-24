@@ -1,5 +1,5 @@
-[![Build Status](http://pkg.julialang.org/badges/Example_0.4.svg)](http://pkg.julialang.org/?pkg=DeclarativePackages&ver=0.4)
-[![Build Status](http://pkg.julialang.org/badges/Example_0.5.svg)](http://pkg.julialang.org/?pkg=DeclarativePackages&ver=0.5)
+[![Build Status](http://pkg.julialang.org/badges/DeclarativePackages_0.4.svg)](http://pkg.julialang.org/?pkg=DeclarativePackages&ver=0.4)
+[![Build Status](http://pkg.julialang.org/badges/DeclarativePackages_0.5.svg)](http://pkg.julialang.org/?pkg=DeclarativePackages&ver=0.5)
 
 **DeclarativePackages.jl**, or `jdp` for short, allows to declaratively specify which Julia packages a project should use, with exact version or commit details.
 
