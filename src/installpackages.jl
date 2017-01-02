@@ -1,6 +1,10 @@
 include("DeclarativePackages.jl")
 using DeclarativePackages
 
+if VERSION < v"0.5.0"
+    readstring = readall
+end
+
 if !haskey(ENV, "DECLARE_VERBOSITY")
     ENV["DECLARE_VERBOSITY"] = 1
 end
