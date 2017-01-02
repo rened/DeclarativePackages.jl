@@ -75,10 +75,10 @@ function generatespecs()
         isdirty = length(status) > 0
 
         if pkg != "METADATA" && isdirty
-            error("$status -- Cannot create a jdp declaration from the currently installed packages as '$dir/$pkg' has local changes.\nPlease commit these changes, then run 'jdp' again.")
+            error("$status -- Cannot create a jdp declaration from the currently installed packages as '$dir' has local changes.\nPlease commit these changes, then run 'jdp' again.")
         end
         log(2, "generatespecs: pkg: $pkg getsel: $(getsel(pkg)) url: $url")
-        list = isempty(getsel(pkg)) ? (url ==  pkg ? metapkgs : giturls) : osspecific 
+        list = isempty(getsel(pkg)) ? (url ==  pkg ? metapkgs : giturls) : osspecific
         push!(list, (pkg, Spec(getsel(pkg), url, onversion ? version[2:end] : commit)))
     end
 
