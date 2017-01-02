@@ -1,8 +1,6 @@
-BinDeps 0.3.6
-HDF5 0.4.5
-JSON 0.3.8
-SHA 0.0.3
-URIParser 0.0.3
-https://github.com/rened/DeclarativePackages.jl.git 0758b40af08af4ae06992d2b2b922b1d4e954bad
-https://github.com/JuliaLang/METADATA.jl.git 80dc1295472e499d3cfe6ce96c84705b5f91fafa
 @osx Homebrew 0.1.10
+Blosc 0.1.7
+Compat 0.10.0
+HDF5 0.7.0
+SHA 0.3.0
+URIParser 0.1.6
