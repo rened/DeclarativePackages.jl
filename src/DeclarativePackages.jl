@@ -1,10 +1,10 @@
 module DeclarativePackages
 
-if VERSION < v"0.4.0-dev+3874"
-    Base.parse{T<:Integer}(::Type{T}, s::AbstractString) = parseint(T, s)
-end
-
 export exportDECLARE, exists, log
+
+if VERSION < v"0.5.0"
+    readstring = readall
+end
 
 exists(filename::AbstractString) = (s = stat(filename); s.inode!=0)
 
@@ -26,7 +26,7 @@ function exportDECLARE(filename = "DECLARE")
     os = map(x -> string(x[2]), osspecific)
     if exists(filename)
         newselectors = unique(map(x -> x[2].selector, osspecific))
-        existingspecs = split(strip(readall(filename)), '\n')
+        existingspecs = split(strip(readstring(filename)), '\n')
         existingspecs = filter(x -> length(x)>0 && split(x)[1][1]=='@' && !in(split(x)[1], newselectors), existingspecs)
         append!(os, existingspecs)
     end
@@ -42,7 +42,7 @@ function generatespecs()
     packages = filter(x->x!="DeclarativePackages", packages)
     push!(packages, "METADATA")
 
-    requires = map(x->try readall(Pkg.dir(first(x))*"/REQUIRE") catch "" end, Pkg.installed())
+    requires = map(x->try readstring(Pkg.dir(first(x))*"/REQUIRE") catch "" end, Pkg.installed())
     requires = unique(vcat(map(x->collect(split(x,'\n')), requires)...))
     requires = filter(x->!isempty(x) && !ismatch(r"^julia", x), requires)
     a = map(x->split(x)[end], requires)
@@ -56,21 +56,21 @@ function generatespecs()
     for pkg in packages
         dir = Pkg.dir(pkg)
         git = ["git", "-C", dir, "--git-dir=$dir/.git"]
-        url = strip(readall(`$git config --get remote.origin.url`))
+        url = strip(readstring(`$git config --get remote.origin.url`))
         metaurl = ""
-        try metaurl = strip(readall(Pkg.dir("METADATA")*"/$pkg/url")) catch end
+        try metaurl = strip(readstring(Pkg.dir("METADATA")*"/$pkg/url")) catch end
         log(2, "generatespecs: url: $url  metaurl: $metaurl")
         if url==metaurl
             url = pkg
         end
-        commit = strip(readall(`$git log -n 1 --format="%H"`))
-        # remote = strip(readall(`$git remote`))
+        commit = strip(readstring(`$git log -n 1 --format="%H"`))
+        # remote = strip(readstring(`$git remote`))
         # remote = split(remote)[end]
-        # branch = strip(readall(`$git rev-parse --abbrev-ref HEAD`))
-        version = split(strip(readall(`$git name-rev --tags --name-only $commit`)),"^")[1]
+        # branch = strip(readstring(`$git rev-parse --abbrev-ref HEAD`))
+        version = split(strip(readstring(`$git name-rev --tags --name-only $commit`)),"^")[1]
         onversion = version != "undefined"
-        # isahead = ismatch(r"^pinned.*tmp", branch) ? false : !isempty(strip(readall(`$git log $remote/$branch..HEAD`)))
-        status = split(strip(readall(`$git status -s`)), "\n")
+        # isahead = ismatch(r"^pinned.*tmp", branch) ? false : !isempty(strip(readstring(`$git log $remote/$branch..HEAD`)))
+        status = split(strip(readstring(`$git status -s`)), "\n")
         status = filter(x->!ismatch(r"deps.jl",x) && length(x)>0, status)
         isdirty = length(status) > 0
 

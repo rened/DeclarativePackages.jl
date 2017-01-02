@@ -1,6 +1,10 @@
 using DeclarativePackages
 using Base.Test
 
+if VERSION < v"0.5.0"
+    readstring = readall
+end
+
 test(name, r, value) = test(name, r, x->x==value)
 function test(name, r, f::Function)
     a = filter(x->length(x)>7 && x[1:7]!="Cloning", split(r[1], '\n'))
@@ -31,7 +35,7 @@ function runjdp(file)
     cp(file, tmp)
     ENV["DECLARE"] = tmp
     ENV["DECLARE_VERBOSITY"] = 0
-    r = (readall(`$jdp $listpackages`), readall(tmp))
+    r = (readstring(`$jdp $listpackages`), readstring(tmp))
     rm(tmp)
     r
 end
