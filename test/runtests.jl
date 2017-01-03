@@ -52,7 +52,7 @@ test("HDF53", runjdp("DECLARE.HDF5_3"), x->contains(x[1],"HDF5 0.7.0") && contai
 ENV["DECLARE_INCLUDETEST"] = "true"
 test("HDF55_withtest", runjdp("DECLARE.HDF5_1"), x->contains(x[1],"HDF5 0.7.0"))
 
-# if !existinginstallation
-#     run(`chmod -R a+w $decdir`)
-#     run(`rm -rf $decdir`)
-# end
+if !existinginstallation
+    run(`chmod -R a+w $decdir`)
+    run(`rm -rf $decdir`)
+end
