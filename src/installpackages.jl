@@ -52,9 +52,24 @@ function gitcommitof(path)
     log(2, "gitcommitof $path")
     cmd = gitcmd(path, "log -n 1 --format=%H")
     log(2, "gitcommitof cmd $cmd")
-    r = strip(readall(cmd))
+    r = try
+        strip(readall(cmd))
+    catch
+        ""
+    end
     log(2, "gitcommitof result $r")
     r
+end
+
+function gitcommitoftag(path, tag)
+    contains(path, "METADATA") && return ""
+    length(tag) > 1 && tag[1] != "v" && return ""
+    cmd = gitcmd(path, "rev-list -n 1 $tag")
+    try
+        return strip(readall(cmd))
+    catch
+        return ""
+    end
 end
 
 function gitclone(name, url, path, commit="")
@@ -85,10 +100,17 @@ function existscheckout(pkg, commit)
     basepath = stepout(Pkg.dir(), 2)
     dirs = readdir(basepath)
     nontmp = filter(x->length(x)>3 && x[1:4]!="tmp_", dirs)
+    log(2, "  nontmp dirs: $nontmp")
     for dir in nontmp
         path = pkgpath(basepath*dir, pkg) 
-        if exists(path) &&  gitcommitof(path) == commit
+        !exists(path) && continue
+        existingcommit = gitcommitof(path) 
+        existingtagcommit = gitcommitoftag(path, commit)
+        log(2, "  existinging commit / wanted commit:  $existingcommit / $commit")
+            sleep(5)
+            if exists(path) && (existingcommit == commit || existingcommit == existingtagcommit)
             log(2, "existscheckout: found $path for $pkg@$commit")
+            sleep(5)
             return path
         end
     end
@@ -96,7 +118,7 @@ function existscheckout(pkg, commit)
 end
 
 function init(lines)
-    tmpdir = randstring(32)
+    tmpdir = "tmp_$(randstring(32))"
     ENV["JULIA_PKGDIR"] = normpath(Pkg.dir()*"/../../$tmpdir")
     metadata = filter(x->ismatch(r"METADATA.jl", x), lines)
     commit = ""
@@ -246,6 +268,8 @@ function finish()
     mv(stepout(Pkg.dir(),1), dir)
     symlink(dir, stepout(Pkg.dir())[1:end-1])
     ENV["JULIA_PKGDIR"] = dir
+
+    cp(ENV["DECLARE"], joinpath(dir,"DECLARE"))
 
     log(1, "Marking $dir read-only ...")
     run(pipeline(`find $dir -maxdepth 1`,`xargs chmod 555 `))

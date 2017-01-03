@@ -79,7 +79,9 @@ function generatespecs()
         end
         log(2, "generatespecs: pkg: $pkg getsel: $(getsel(pkg)) url: $url")
         list = isempty(getsel(pkg)) ? (url ==  pkg ? metapkgs : giturls) : osspecific
-        push!(list, (pkg, Spec(getsel(pkg), url, onversion ? version[2:end] : commit)))
+        spec = Spec(getsel(pkg), url, onversion ? version[2:end] : commit)
+        log(2, "generatespecs: $spec")
+        push!(list, (pkg, spec))
     end
 
     specs = Any[]
