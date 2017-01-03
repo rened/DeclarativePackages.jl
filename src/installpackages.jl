@@ -63,13 +63,9 @@ end
 
 function gitcommitoftag(path, tag)
     contains(path, "METADATA") && return ""
-    length(tag) > 1 && tag[1] != "v" && return ""
+    length(tag) > 1 && tag[1] != 'v' && return ""
     cmd = gitcmd(path, "rev-list -n 1 $tag")
-    try
-        return strip(readall(cmd))
-    catch
-        return ""
-    end
+    strip(readall(cmd))
 end
 
 function gitclone(name, url, path, commit="")
@@ -107,7 +103,7 @@ function existscheckout(pkg, commit)
         !exists(path) && continue
         existingcommit = gitcommitof(path) 
         existingtagcommit = gitcommitoftag(path, commit)
-        log(2, "  existinging commit / wanted commit:  $existingcommit / $commit")
+        log(2, "  existinging commit / existingtagcommit / wanted commit:  $existingcommit / $existingtagcommit / $commit")
         if exists(path) && (existingcommit == commit || existingcommit == existingtagcommit)
             log(2, "existscheckout: found $path for $pkg@$commit")
             return path
@@ -245,7 +241,17 @@ function resolve(packages, needbuilding)
     end
     log(1, "Invoking Pkg.resolve() ...")
     Pkg.resolve()
-    map(x -> Pkg.build(x), needbuilding)
+    map(buildifnecessary, needbuilding)
+end
+
+function buildifnecessary(x)
+    depsdir = Pkg.dir(x,"deps")
+    buildscript = joinpath(depsdir, "build.jl")
+    declarebuilt = joinpath(depsdir, "built.by.declarepackages.jl")
+    exists(buildscript) || return
+    exists(declarebuilt) && return
+    Pkg.build(x)
+    touch(declarebuilt)
 end
 
 

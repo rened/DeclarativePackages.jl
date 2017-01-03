@@ -71,7 +71,7 @@ function generatespecs()
         onversion = version != "undefined"
         # isahead = ismatch(r"^pinned.*tmp", branch) ? false : !isempty(strip(readstring(`$git log $remote/$branch..HEAD`)))
         status = split(strip(readstring(`$git status -s`)), "\n")
-        status = filter(x->!ismatch(r"deps.jl",x) && length(x)>0, status)
+        status = filter(x->!ismatch(r"deps.jl",x) && length(x)>0 && !contains(x,"built.by.declarepackages.jl"), status)
         isdirty = length(status) > 0
 
         if pkg != "METADATA" && isdirty

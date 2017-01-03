@@ -48,7 +48,7 @@ test("JSON1", runjdp("DECLARE.JSON1"), x->contains(x[2],"JSON 0.3.9"))
 test("JSON2", runjdp("DECLARE.JSON2"), x->contains(x[2],"JSON 0.3.7"))
 test("HDF51", runjdp("DECLARE.HDF5_1"), x->contains(x[1],"HDF5 0.7.0") && !contains(x[2],"DataFrames"))
 test("HDF52", runjdp("DECLARE.HDF5_2"), x->contains(x[1],"HDF5 0.7.0") && contains(x[2],"SHA 0.2.2"))
-test("HDF53", runjdp("DECLARE.HDF5_3"), x->contains(x[1],"HDF5 0.7.0") && contains(x[2],"rened/HDF5"))
+test("HDF53", runjdp("DECLARE.HDF5_3"), x->contains(x[2],"HDF5.jl.git 0.7.0") && contains(x[2],"rened/HDF5"))
 ENV["DECLARE_INCLUDETEST"] = "true"
 test("HDF55_withtest", runjdp("DECLARE.HDF5_1"), x->contains(x[1],"HDF5 0.7.0"))
 
