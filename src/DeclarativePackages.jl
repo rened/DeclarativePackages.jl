@@ -42,7 +42,7 @@ function generatespecs()
     packages = filter(x->x!="DeclarativePackages", packages)
     push!(packages, "METADATA")
 
-    requires = map(x->try readstring(Pkg.dir(first(x))*"/REQUIRE") catch "" end, Pkg.installed())
+    requires = [try readstring(Pkg.dir(first(x))*"/REQUIRE") catch "" end for x in Pkg.installed()]
     requires = unique(vcat(map(x->collect(split(x,'\n')), requires)...))
     requires = filter(x->!isempty(x) && !ismatch(r"^julia", x), requires)
     a = map(x->split(x)[end], requires)
