@@ -97,6 +97,7 @@ end
 
 
 function existscheckout(pkg, commit)
+    log(2, "######## existscheckout $pkg $commit")
     basepath = stepout(Pkg.dir(), 2)
     dirs = readdir(basepath)
     nontmp = filter(x->length(x)>3 && x[1:4]!="tmp_", dirs)
@@ -107,10 +108,8 @@ function existscheckout(pkg, commit)
         existingcommit = gitcommitof(path) 
         existingtagcommit = gitcommitoftag(path, commit)
         log(2, "  existinging commit / wanted commit:  $existingcommit / $commit")
-            sleep(5)
-            if exists(path) && (existingcommit == commit || existingcommit == existingtagcommit)
+        if exists(path) && (existingcommit == commit || existingcommit == existingtagcommit)
             log(2, "existscheckout: found $path for $pkg@$commit")
-            sleep(5)
             return path
         end
     end
