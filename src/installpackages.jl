@@ -20,7 +20,7 @@ end
 
 function readfile()
     log(1, "Parsing $(ENV["DECLARE"]) ... ")
-    lines = split(readall(ENV["DECLARE"]), '\n')
+    lines = split(readstring(ENV["DECLARE"]), '\n')
     lines = map(x->replace(x, r"#.*", ""), lines)
     lines = filter(x->!isempty(x), lines)
     return lines
@@ -53,7 +53,7 @@ function gitcommitof(path)
     cmd = gitcmd(path, "log -n 1 --format=%H")
     log(2, "gitcommitof cmd $cmd")
     r = try
-        strip(readall(cmd))
+        strip(readstring(cmd))
     catch
         ""
     end
@@ -65,7 +65,7 @@ function gitcommitoftag(path, tag)
     contains(path, "METADATA") && return ""
     length(tag) > 1 && tag[1] != 'v' && return ""
     cmd = gitcmd(path, "rev-list -n 1 $tag")
-    strip(readall(cmd))
+    strip(readstring(cmd))
 end
 
 function gitclone(name, url, path, commit="")
@@ -75,11 +75,11 @@ function gitclone(name, url, path, commit="")
         commit = gitcommitof(path)
     else
         # check if the repo knows this commit. if not, check in METADATA
-        isknown = ismatch(Regex(commit), readall(gitcmd(path, "tag")))
+        isknown = ismatch(Regex(commit), readstring(gitcmd(path, "tag")))
         if !isknown
             filename = Pkg.dir("METADATA/$name/versions/$(commit[2:end])/sha1")
             if exists(filename)
-                commit = strip(readall(filename))
+                commit = strip(readstring(filename))
             else
                 if commit[1] == 'v'
                     error("gitclone: Could not find a commit hash for version $commit for package $name ($url)")
@@ -151,7 +151,7 @@ function parseline(a)
         isregistered = false
     else
         name = nameorurl
-        url = strip(readall("$(Pkg.dir())/METADATA/$name/url"))
+        url = strip(readstring("$(Pkg.dir())/METADATA/$name/url"))
         isregistered = true
     end
     if name=="METADATA"
@@ -212,8 +212,8 @@ function install(a::Package)
             ""
         end
     end
-    metadatacommit(version) = strip(readall(Pkg.dir("METADATA/$(a.name)/versions/$(version[2:end])/sha1")))
-    
+    metadatacommit(version) = strip(readstring(Pkg.dir("METADATA/$(a.name)/versions/$(version[2:end])/sha1")))
+
     commit = a.commit == "METADATA" ? latest() : a.commit
     installorlink(a.name, a.url, path, commit)
 end
@@ -234,7 +234,7 @@ function resolve(packages, needbuilding)
             if haskey(ENV, "DECLARE_INCLUDETEST") && ENV["DECLARE_INCLUDETEST"]=="true"
                 testrequire = Pkg.dir(pkg.name*"/test/REQUIRE")
                 if exists(testrequire)
-                    write(io, readall(testrequire))
+                    write(io, readstring(testrequire))
                 end
             end
         end
