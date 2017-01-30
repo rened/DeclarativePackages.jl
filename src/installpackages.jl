@@ -41,9 +41,13 @@ function hardlinkdirs(existingpath, path)
         hardlinkdirs(dir[2]*"/", path*dir[1]*"/")
     end
     for file in filter(x->!isdir(x[2]), items)
-        @osx_only ccall((:link, "libc"), Int, (Ptr{UInt8}, Ptr{UInt8}), file[2] , path*file[1])
-        @linux_only ccall((:link, "libc.so.6"), Int, (Ptr{UInt8}, Ptr{UInt8}), file[2] , path*file[1])
+        hardlinkfile(file[2] , path*file[1])
     end
+end
+
+function hardlinkfile(from, to)
+    @osx_only ccall((:link, "libc"), Int, (Ptr{UInt8}, Ptr{UInt8}), from, to)
+    @linux_only ccall((:link, "libc.so.6"), Int, (Ptr{UInt8}, Ptr{UInt8}), from, to)
 end
 
 
@@ -102,7 +106,7 @@ function existscheckout(pkg, commit)
         path = pkgpath(basepath*dir, pkg) 
         !exists(path) && continue
         existingcommit = gitcommitof(path) 
-        existingtagcommit = gitcommitoftag(path, commit)
+        existingtagcommit = try gitcommitoftag(path, commit) catch "" end
         log(2, "  existinging commit / existingtagcommit / wanted commit:  $existingcommit / $existingtagcommit / $commit")
         if exists(path) && (existingcommit == commit || existingcommit == existingtagcommit)
             log(2, "existscheckout: found $path for $pkg@$commit")
@@ -196,6 +200,18 @@ function installorlink(name, url, path, commit)
     else
         log(1, "Linking $(name) ...")
         hardlinkdirs(existingpath, path)
+        
+        # link the compiled module, too
+        # @show name url path commit existingpath path
+        # if name != "METADATA"
+            # v = "v$(VERSION.major).$(VERSION.minor)"
+            # from = joinpath("/",split(existingpath,"/")[1:end-3]..., "lib", v, name*".ji")
+            # todir = joinpath("/",split(path        ,"/")[1:end-3]..., "lib", v)
+            # mkpath(todir)
+            # to =  joinpath(todir, name*".ji")
+            # @show from to
+            # hardlinkfile(from, to)
+        # end
         return
     end
 end
@@ -219,7 +235,9 @@ function install(a::Package)
 end
 
 function resolve(packages, needbuilding)
-    open(Pkg.dir()*"/REQUIRE","w") do io
+    requirename = Pkg.dir()*"/REQUIRE"
+    log(3, requirename)
+    open(requirename,"w") do io
         for pkg in packages
             if !isempty(pkg.commit) && pkg.commit[1]=='v'
                 m,n,o = map(x->parse(Int,x), split(pkg.commit[2:end], '.'))

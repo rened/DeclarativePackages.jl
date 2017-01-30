@@ -9,7 +9,7 @@ end
 exists(filename::AbstractString) = (s = stat(filename); s.inode!=0)
 
 import Base.log
-log(level, a) = if haskey(ENV, "DECLARE_VERBOSITY") && parse(Int,ENV["DECLARE_VERBOSITY"])>=level println(a) end
+log(level, a) = if haskey(ENV, "DECLARE_VERBOSITY") && parse(Int,ENV["DECLARE_VERBOSITY"])>=level println(); println(a) end
 
 type Spec
     selector
