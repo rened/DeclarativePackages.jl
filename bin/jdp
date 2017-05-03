@@ -60,7 +60,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 
 # install packages if not installled yet
-if [ ! -e $JULIA_PKGDIR/v0.2/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.3/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.4/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.6/REQUIRE ]; 
+if [ ! -e $JULIA_PKGDIR/v0.2/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.3/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.4/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.5/REQUIRE && [ ! -e $JULIA_PKGDIR/v0.6/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.7/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.8/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v1.0/REQUIRE ];
 then
 	DECLARE=$DECLARE $DECLARE_JULIA $DIR/../src/installpackages.jl 
 fi
