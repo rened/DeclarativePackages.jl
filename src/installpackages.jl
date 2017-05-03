@@ -276,8 +276,8 @@ end
 function finish()
     exportDECLARE(ENV["DECLARE"])
 
-    @static if is_apple() md5 = strip(readall(`md5 -q $(ENV["DECLARE"])`)) end
-    @static if is_linux() md5 = strip(readall(`md5sum $(ENV["DECLARE"])`)) end
+    @static if is_apple() md5 = strip(readstring(`md5 -q $(ENV["DECLARE"])`)) end
+    @static if is_linux() md5 = strip(readstring(`md5sum $(ENV["DECLARE"])`)) end
     md5 = split(md5)[1]
     if haskey(ENV, "DECLARE_INCLUDETEST") && ENV["DECLARE_INCLUDETEST"]=="true"
         md5 = md5*"withtest"
