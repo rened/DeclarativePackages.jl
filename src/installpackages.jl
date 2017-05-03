@@ -282,7 +282,7 @@ function finish()
     if haskey(ENV, "DECLARE_INCLUDETEST") && ENV["DECLARE_INCLUDETEST"]=="true"
         md5 = md5*"withtest"
     end
-    dir = normpath(Pkg.dir()*"/../../"*md5)
+    dir = normpath(Pkg.dir()*"/../../"*md5*"-$(VERSION.major).$(VERSION.minor)")
     
     if exists(dir) 
         run(`chmod -R a+w $dir`)
