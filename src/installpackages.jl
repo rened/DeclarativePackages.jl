@@ -1,5 +1,8 @@
 include("DeclarativePackages.jl")
-using DeclarativePackages
+
+Pkg.init()
+Pkg.add("Compat")
+using DeclarativePackages, Compat
 
 if VERSION < v"0.5.0"
     readstring = readall
@@ -240,7 +243,7 @@ function resolve(packages, needbuilding)
     open(requirename,"w") do io
         for pkg in packages
             if !isempty(pkg.commit) && pkg.commit[1]=='v'
-                m,n,o = map(x->parse(Int,x), split(pkg.commit[2:end], '.'))
+                m,n,o = map(x->parse(Int,x), split(split(pkg.commit[2:end],'~')[1], '.'))
                 versions = "$m.$n.$o $m.$n.$(o+1)-"
             else
                 versions = ""
