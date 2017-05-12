@@ -72,7 +72,7 @@ HASH=`$MD5 $DECLARE | tr " " "\n" | head -n 1`
 export JULIA_PKGDIR=$HOME/.julia/declarative/$HASH$TESTSUFFIX-$JULIA_VERSION
 
 # requires a patched julia build
-if [ -z "$JULIA_LOAD_CACHE_PATH" ]
+if [ "$JULIA_LOAD_CACHE_PATH" != "" ]
 then
     export JULIA_LOAD_CACHE_PATH=$HOME/.julia/declarative/$HASH$TESTSUFFIX-$JULIA_VERSION-lib
     mkdir -p $JULIA_LOAD_CACHE_PATH
