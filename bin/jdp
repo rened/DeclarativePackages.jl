@@ -23,6 +23,11 @@ else
 	TESTSUFFIX=""
 fi
 
+if [ ! -r "$DECLARE_BASEPATH" ] 
+then
+    DECLARE_BASEPATH = "$HOME/.julia/declarative"
+fi
+
 
 # need a declaration file
 if [ ! -e $DECLARE ]
@@ -46,7 +51,7 @@ fi
 
 JULIA_VERSION=`$DECLARE_JULIA -e julia -e "println(VERSION.major,'.',VERSION.minor)"`
 HASH=`$MD5 $DECLARE | tr " " "\n" | head -n 1`
-export JULIA_PKGDIR=$HOME/.julia/declarative/$HASH$TESTSUFFIX-$JULIA_VERSION
+export JULIA_PKGDIR=$DECLARE_BASEPATH/$HASH$TESTSUFFIX-$JULIA_VERSION
 
 # find out where the script is:
 # (thanks to http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in)
@@ -69,12 +74,12 @@ fi
 
 # HASH might have changed due to DECLARE update, recompute
 HASH=`$MD5 $DECLARE | tr " " "\n" | head -n 1`
-export JULIA_PKGDIR=$HOME/.julia/declarative/$HASH$TESTSUFFIX-$JULIA_VERSION
+export JULIA_PKGDIR=$DECLARE_BASEPATH/$HASH$TESTSUFFIX-$JULIA_VERSION
 
 # requires a patched julia build
 if [ "$JULIA_LOAD_CACHE_PATH" != "" ]
 then
-    export JULIA_LOAD_CACHE_PATH=$HOME/.julia/declarative/$HASH$TESTSUFFIX-$JULIA_VERSION-lib
+    export JULIA_LOAD_CACHE_PATH=$DECLARE_BASEPATH/$HASH$TESTSUFFIX-$JULIA_VERSION-lib
     mkdir -p $JULIA_LOAD_CACHE_PATH
 fi
 
