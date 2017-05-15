@@ -23,7 +23,7 @@ else
 	TESTSUFFIX=""
 fi
 
-if [ ! -r "$DECLARE_BASEPATH" ] 
+if [ ! -z "$DECLARE_BASEPATH" ]
 then
     DECLARE_BASEPATH = "$HOME/.julia/declarative"
 fi
