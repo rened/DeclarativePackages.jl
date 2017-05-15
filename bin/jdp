@@ -8,14 +8,17 @@ if [ -z "$DECLARE" ]
 then
 	DECLARE=DECLARE
 fi
+
 if [ -z "$DECLARE_JULIA" ]
 then
 	DECLARE_JULIA=julia
 fi
+
 if [ -z "$DECLARE_INCLUDETEST" ]
 then
 	DECLARE_INCLUDETEST=""
 fi
+
 if [ ! -z "$DECLARE_INCLUDETEST" ] && [ $DECLARE_INCLUDETEST == "true" ]
 then
 	TESTSUFFIX="withtest"
@@ -23,10 +26,11 @@ else
 	TESTSUFFIX=""
 fi
 
-if [ ! -z "$DECLARE_BASEPATH" ]
+if [ -z "$DECLARE_BASEPATH" ]
 then
-    DECLARE_BASEPATH = "$HOME/.julia/declarative"
+    DECLARE_BASEPATH=$HOME/.julia/declarative
 fi
+echo "DECLARE_BASEPATH: $DECLARE_BASEPATH"
 
 
 # need a declaration file
