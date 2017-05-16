@@ -298,7 +298,7 @@ function finish()
     cp(ENV["DECLARE"], joinpath(dir,"DECLARE"))
 
     log(1, "Removing .git dirs ...")
-    run(`find $dir -name ".git" -delete`)
+    run(`find $dir -name ".git" -type d -exec rm -r "{}" \;`)
     log(1, "Marking $dir read-nly ...")
     run(pipeline(`find $dir -maxdepth 1`,`xargs chmod 555 `))
     run(`chmod 755 $dir`)
