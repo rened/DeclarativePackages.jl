@@ -68,7 +68,16 @@ fi
 
 # HASH might have changed due to DECLARE update, recompute
 HASH=`$MD5 $DECLARE | tr " " "\n" | head -n 1`
-export JULIA_PKGDIR=$HOME/.julia/declarative/$HASH$TESTSUFFIX
+export JULIA_PKGDIR=$DECLARE_BASEPATH/$HASH$TESTSUFFIX-$JULIA_VERSION
+
+# requires a patched julia build
+echo "JULIA_LOAD_CACHE_PATH $JULIA_LOAD_CACHE_PATH"
+
+if [ -z "$JULIA_LOAD_CACHE_PATH" ]
+then
+    export JULIA_LOAD_CACHE_PATH=$DECLARE_BASEPATH/$HASH$TESTSUFFIX-$JULIA_VERSION-lib
+    mkdir -p $JULIA_LOAD_CACHE_PATH
+fi
 
 # invoke julia
 $DECLARE_JULIA --startup-file=no -L $DIR/../src/setloadpath.jl "$@"
