@@ -1,5 +1,8 @@
 include("DeclarativePackages.jl")
-using DeclarativePackages
+
+Pkg.init()
+Pkg.add("Compat")
+using DeclarativePackages, Compat
 
 if VERSION < v"0.5.0"
     readstring = readall
@@ -46,8 +49,8 @@ function hardlinkdirs(existingpath, path)
 end
 
 function hardlinkfile(from, to)
-    @osx_only ccall((:link, "libc"), Int, (Ptr{UInt8}, Ptr{UInt8}), from, to)
-    @linux_only ccall((:link, "libc.so.6"), Int, (Ptr{UInt8}, Ptr{UInt8}), from, to)
+    @static if is_apple() ccall((:link, "libc"), Int, (Ptr{UInt8}, Ptr{UInt8}), from, to) end
+    @static if is_linux() ccall((:link, "libc.so.6"), Int, (Ptr{UInt8}, Ptr{UInt8}), from, to) end
 end
 
 
@@ -184,10 +187,10 @@ function install(packages::Array)
     linux = filter(x->x.os=="@linux", packages)
     windows = filter(x->x.os=="@windows", packages)
     everywhere = filter(x->x.os=="", packages)
-    @osx_only map(install, osx)
-    @unix_only map(install, unix)
-    @linux_only map(install, linux)
-    @windows_only map(install, windows)
+    @static if is_apple() map(install, osx) end
+    @static if is_unix() map(install, unix) end
+    @static if is_linux() map(install, linux) end
+    @static if is_windows() map(install, windows) end
     needbuilding = filter(x->x!=nothing, map(install, everywhere))
 end
 
@@ -240,7 +243,7 @@ function resolve(packages, needbuilding)
     open(requirename,"w") do io
         for pkg in packages
             if !isempty(pkg.commit) && pkg.commit[1]=='v'
-                m,n,o = map(x->parse(Int,x), split(pkg.commit[2:end], '.'))
+                m,n,o = map(x->parse(Int,x), split(split(pkg.commit[2:end],'~')[1], '.'))
                 versions = "$m.$n.$o $m.$n.$(o+1)-"
             else
                 versions = ""
@@ -276,13 +279,13 @@ end
 function finish()
     exportDECLARE(ENV["DECLARE"])
 
-    @osx_only md5 = strip(readall(`md5 -q $(ENV["DECLARE"])`))
-    @linux_only md5 = strip(readall(`md5sum $(ENV["DECLARE"])`))
+    @static if is_apple() md5 = strip(readstring(`md5 -q $(ENV["DECLARE"])`)) end
+    @static if is_linux() md5 = strip(readstring(`md5sum $(ENV["DECLARE"])`)) end
     md5 = split(md5)[1]
     if haskey(ENV, "DECLARE_INCLUDETEST") && ENV["DECLARE_INCLUDETEST"]=="true"
         md5 = md5*"withtest"
     end
-    dir = normpath(Pkg.dir()*"/../../"*md5)
+    dir = normpath(Pkg.dir()*"/../../"*md5*"-$(VERSION.major).$(VERSION.minor)")
     
     if exists(dir) 
         run(`chmod -R a+w $dir`)

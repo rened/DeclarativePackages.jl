@@ -8,20 +8,29 @@ if [ -z "$DECLARE" ]
 then
 	DECLARE=DECLARE
 fi
+
 if [ -z "$DECLARE_JULIA" ]
 then
 	DECLARE_JULIA=julia
 fi
+
 if [ -z "$DECLARE_INCLUDETEST" ]
 then
 	DECLARE_INCLUDETEST=""
 fi
+
 if [ ! -z "$DECLARE_INCLUDETEST" ] && [ $DECLARE_INCLUDETEST == "true" ]
 then
 	TESTSUFFIX="withtest"
 else
 	TESTSUFFIX=""
 fi
+
+if [ -z "$DECLARE_BASEPATH" ]
+then
+    DECLARE_BASEPATH=$HOME/.julia/declarative
+fi
+echo "DECLARE_BASEPATH: $DECLARE_BASEPATH"
 
 
 # need a declaration file
@@ -44,8 +53,9 @@ else
 	STATVALUE=555
 fi
 
+JULIA_VERSION=`$DECLARE_JULIA -e julia -e "println(VERSION.major,'.',VERSION.minor)"`
 HASH=`$MD5 $DECLARE | tr " " "\n" | head -n 1`
-export JULIA_PKGDIR=$HOME/.julia/declarative/$HASH$TESTSUFFIX
+export JULIA_PKGDIR=$DECLARE_BASEPATH/$HASH$TESTSUFFIX-$JULIA_VERSION
 
 # find out where the script is:
 # (thanks to http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in)
@@ -60,7 +70,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 
 # install packages if not installled yet
-if [ ! -e $JULIA_PKGDIR/v0.2/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.3/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.4/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.6/REQUIRE ]; 
+if [ ! -e $JULIA_PKGDIR/v0.2/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.3/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.4/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.5/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.6/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.7/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v0.8/REQUIRE ] && [ ! -e $JULIA_PKGDIR/v1.0/REQUIRE ];
 then
 	DECLARE=$DECLARE $DECLARE_JULIA $DIR/../src/installpackages.jl 
 fi
