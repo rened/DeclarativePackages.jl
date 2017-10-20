@@ -1,5 +1,6 @@
 include("DeclarativePackages.jl")
 
+chmod(Pkg.dir(), 0o777)
 Pkg.init()
 Pkg.add("Compat")
 using DeclarativePackages, Compat
