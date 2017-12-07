@@ -33,7 +33,7 @@ function readfile()
 end
 
 pkgpath(basepath, pkg) = normpath(basepath*"/v$(VERSION.major).$(VERSION.minor)/$pkg/")
-markreadonly(path) = run(`chmod a-w $path`)
+markreadonly(path) = nothing #run(`chmod a-w $path`)
 stepout(path, n=1) = normpath(path*"/"*repeat("../",n))
 
 function hardlinkdirs(existingpath, path) 
