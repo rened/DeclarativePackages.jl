@@ -1,5 +1,7 @@
 include("DeclarativePackages.jl")
 
+@show LOAD_PATH
+try chmod(dirname(Pkg.dir()), 0o777) end
 try chmod(Pkg.dir(), 0o777) end
 Pkg.init()
 Pkg.add("Compat")
